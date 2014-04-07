@@ -1,4 +1,6 @@
 from models import Process, User
+from database import Database
+from time import sleep
 import psutil
 
 
@@ -8,6 +10,7 @@ def get_processes():
     """
     processes = list()
     for process in psutil.get_process_list():
+        print('Loading process: {}').format(process)
         processes.append(Process(process))
     return processes
 
@@ -43,3 +46,24 @@ def lookup_users(user_name, user_list):
             response.append(user)
     return response
 
+def run():
+    """
+    Run a simple daemon for now.
+    """
+    db = Database()
+    while True:
+        print('Loading processes..')
+        processes = get_processes()
+        for process in processes:
+            #TODO: How do I watch THIS process?
+            #TODO: How to handle processes that close?
+            if process.name == 'python2.7':
+                pass
+            else:
+                print('PROCESS:{}, PID:{}, PROCESS_RUN_TIME:{}, BIN_HASH:{}'.format(process.name, process.pid,
+                                                                                    process.run_time, process.md5_hash))
+        print('Sleeping....')
+        sleep(15)
+
+if __name__ == '__main__':
+    run()
