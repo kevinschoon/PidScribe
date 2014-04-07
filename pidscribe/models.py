@@ -1,5 +1,6 @@
 from time import time
 import ConfigParser
+from util import get_md5_hash, check_if_running
 import psutil
 
 
@@ -8,10 +9,23 @@ class Process(object):
     Create a process record from a psutil object.
     """
     def __init__(self, process):
+        self.time = time()
         self.pid = process.pid
         self.name = process.name()
-        self.time = time()
         self.process = process
+
+    @property
+    def md5_hash(self):
+        """
+        Get the MD5 hash of the binary.
+        """
+        #TODO: Handle permission errors?
+        try:
+            md5_hash = get_md5_hash(self.process.exe())
+        except psutil.AccessDenied:
+            return None
+
+        return md5_hash
 
     @property
     def run_time(self):
@@ -26,12 +40,8 @@ class Process(object):
         """
         Check to see if the process is still running.
         """
-        try:
-            psutil.Process(pid=self.pid)
-            running = True
-        except psutil.NoSuchProcess:
-            running = False
-        return running
+        return check_if_running(self.pid)
+
 
 
 class User(object):
@@ -62,6 +72,7 @@ class Config(object):
 
     @property
     def users(self):
+        #TODO: Catch white space in front of processes.
         """
         Return a list of users from the configuration file.
         """
