@@ -53,5 +53,5 @@ coverage.xml
 docs/_build/
 
 #Ignore idea files
-./idea/*
+./idea
 
