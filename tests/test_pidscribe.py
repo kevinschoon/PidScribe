@@ -1,9 +1,9 @@
 import subprocess
 import unittest
 from getpass import getuser
-from pidscribe.models import Config, Process, User
+from pidscribe.models import Config, LoadedProcess, User
 from pidscribe.util import get_md5_hash, check_if_running
-from pidscribe.controller import get_processes, get_users, lookup_process_name, lookup_users
+from pidscribe.controller import Controller
 
 
 class TestProcess(unittest.TestCase):
@@ -13,7 +13,7 @@ class TestProcess(unittest.TestCase):
         self.process_name = 'sleep'
 
     def test_get_processes(self):
-        processes = get_processes()
+        processes = Controller.get_processes()
         self.assertIsInstance(processes, list)
 
         for process in processes:
@@ -24,8 +24,8 @@ class TestProcess(unittest.TestCase):
                 self.assertIsInstance(process.md5_hash, str)
 
     def test_named_process_lookup(self):
-        processes = get_processes()
-        named_lookup = lookup_process_name(self.process_name, processes)
+        processes = Controller.get_processes()
+        named_lookup = Controller.lookup_process_name(self.process_name, processes)
         self.assertGreaterEqual(named_lookup, 1)
 
     def test_config_lookup(self):
