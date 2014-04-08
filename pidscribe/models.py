@@ -4,7 +4,12 @@ from util import get_md5_hash, check_if_running
 import psutil
 
 
-class Process(object):
+class ProcessError(Exception):
+    def __init__(self, message):
+        Exception.__init__(self, message)
+
+
+class LoadedProcess(object):
     """
     Create a process record from a psutil object.
     """
@@ -13,18 +18,21 @@ class Process(object):
         self.pid = process.pid
         self.name = process.name()
         self.process = process
+        self._validate_access()
+
+    def _validate_access(self):
+        try:
+            v = self.md5_hash
+        except psutil.AccessDenied:
+            raise ProcessError('Access Denied')
+
 
     @property
     def md5_hash(self):
         """
         Get the MD5 hash of the binary.
         """
-        #TODO: Handle permission errors?
-        try:
-            md5_hash = get_md5_hash(self.process.exe())
-        except psutil.AccessDenied:
-            return None
-
+        md5_hash = get_md5_hash(self.process.exe())
         return md5_hash
 
     @property
@@ -43,8 +51,7 @@ class Process(object):
         return check_if_running(self.pid)
 
 
-
-class User(object):
+class LoadedUser(object):
     """
     Create a user record from a psutil's list_users
     """
